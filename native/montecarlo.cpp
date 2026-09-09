@@ -34,18 +34,31 @@ struct Cell {
 
 // One path of a driftless log-normal walk, sampled at `steps` points, reporting whether the
 // running extreme crossed the level.
+// Barrier correction for discrete monitoring. A path sampled at N points misses crossings
+// that happen between two samples, so a discretely monitored barrier behaves like a slightly
+// further one. Broadie, Glasserman and Kou give the shift: beta * sigma * sqrt(dt), with
+// beta = -zeta(1/2)/sqrt(2*pi) = 0.5826. Applying it to the simulated barrier is what makes
+// a finite-step simulation comparable with a continuous-time formula.
+constexpr double BGK_BETA = 0.5826;
+
+// One path of the process the pricing actually assumes: driftless *in log space*, so
+// d ln(cap) = sigma dW with no Ito correction. That choice is the model, not an accident:
+// the reflection principle result the board quotes is exactly the first passage probability
+// of this process. Adding the -0.5 sigma^2 dt term would simulate a different walk, and the
+// two disagree by ten points of probability on an hour-long meme market.
 bool crossed(std::mt19937_64& rng, double cap, double level, double sigma, double hours,
              predly::Kind kind, int steps) {
     std::normal_distribution<double> z(0.0, 1.0);
     const double dt = hours / static_cast<double>(steps);
     const double vol = sigma * std::sqrt(dt);
-    // Driftless in the arithmetic sense the pricing uses: the log process carries the
-    // Ito correction so that the level itself has no systematic direction.
-    const double drift = -0.5 * sigma * sigma * dt;
+    const double shift = BGK_BETA * vol;
     double log_price = std::log(cap);
-    const double log_level = std::log(level);
+    // Up barriers move down by the correction, down barriers move up: both get slightly
+    // easier to reach, compensating for the crossings a discrete grid cannot see.
+    const double log_level =
+        std::log(level) + (kind == predly::Kind::Touch ? -shift : shift);
     for (int i = 0; i < steps; ++i) {
-        log_price += drift + vol * z(rng);
+        log_price += vol * z(rng);
         if (kind == predly::Kind::Touch) {
             if (log_price >= log_level) return true;
         } else {

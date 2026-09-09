@@ -39,7 +39,14 @@ break the pricing.
 
 ## The price
 
-The cap is modelled as a driftless log-normal walk. Drift is deliberately left out: over an hour
+The cap is modelled as a walk that is **driftless in log space**: `d ln(cap) = σ dW`, with no
+Itô correction term. That is a modelling choice worth naming, because the alternative (a walk
+whose *level* is a martingale, carrying `−½σ²dt` in the log) prices the same market roughly ten
+points of probability lower over an hour. `native/montecarlo.cpp` simulates the first process,
+which is the one the reflection-principle formula belongs to, and the simulation and the closed
+form agree to fractions of a cent.
+
+Drift beyond that is deliberately left out: over an hour
 the drift term is swamped by the volatility term, and estimating it from six hours of memecoin
 candles produces a number that says more about the last pump than about the next one.
 
