@@ -116,8 +116,10 @@ int main(int argc, char** argv) {
                                            tok.caps.begin() + static_cast<long>(open));
             const double sigma = predly::realized_sigma(hist);
             const double cap = tok.caps[open];
-            // Treat the horizon as one hour of wall clock, the way the hour template does.
-            const double hours = 1.0;
+            // Sigma is per hour and the model counts twelve bars to the hour, so a horizon
+            // measured in fills converts the same way. Fills are not evenly spaced in time,
+            // which makes this a first order calibration rather than a wall clock backtest.
+            const double hours = static_cast<double>(horizon) / predly::BARS_PER_HOUR;
 
             for (double k : ks) {
                 for (predly::Kind kind : kinds) {

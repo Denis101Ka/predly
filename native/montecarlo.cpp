@@ -32,8 +32,6 @@ struct Cell {
     const char* label;
 };
 
-// One path of a driftless log-normal walk, sampled at `steps` points, reporting whether the
-// running extreme crossed the level.
 // Barrier correction for discrete monitoring. A path sampled at N points misses crossings
 // that happen between two samples, so a discretely monitored barrier behaves like a slightly
 // further one. Broadie, Glasserman and Kou give the shift: beta * sigma * sqrt(dt), with
