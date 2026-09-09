@@ -1,0 +1,6 @@
+# generated artifacts should not drown the language bar or the diffs
+board/board.html linguist-generated=true
+assets/*.html linguist-generated=true
+data/snapshot-latest.json linguist-generated=true
+data/history/*.json linguist-generated=true
+package-lock.json linguist-generated=true
