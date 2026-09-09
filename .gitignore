@@ -13,3 +13,9 @@ venv/
 *.tmp
 .DS_Store
 Thumbs.db
+
+# generated artifacts, rebuilt by the scripts that made them
+board/board.html
+assets/*.html
+native/bin/
+native/build/

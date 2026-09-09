@@ -32,9 +32,32 @@ jobs:
       - name: build and test
         run: npm test
 
+  native:
+    name: native engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: compiler
+        run: g++ --version
+      - name: build
+        run: make -C native
+      - name: replay published vectors
+        run: ./native/bin/vectors_test verify/vectors.json
+      - name: closed form against simulated paths
+        run: ./native/bin/montecarlo 120000 --steps 1200
+      - name: calibration sweep over the published snapshot
+        run: ./native/bin/backtest data/snapshot-latest.json --csv /tmp/calibration.csv
+      - name: throughput
+        run: ./native/bin/odds --bench 5000000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: calibration
+          path: /tmp/calibration.csv
+          if-no-files-found: ignore
+
   agreement:
-    name: both engines agree
-    needs: [python, typescript]
+    name: three engines, one price
+    needs: [python, typescript, native]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,24 +69,46 @@ jobs:
           node-version: "22"
       - run: npm install --no-audit --no-fund
       - run: npm run build
-      - name: compare cents across languages
+      - run: make -C native
+
+      - name: python cents
         run: |
-          python - <<'PY' > /tmp/py.txt
+          python - > /tmp/py.txt <<'PY'
           import json, sys
           sys.path.insert(0, ".")
           from verify.odds import quote
-          v = json.load(open("verify/vectors.json"))["vectors"]
-          for x in v:
+          for x in json.load(open("verify/vectors.json"))["vectors"]:
               q = quote(x["cap"], x["level"], x["sigma"], x["hours"], x["kind"])
-              print(x["name"], q.yes_cents, q.no_cents)
+              print(f'{x["name"]}|{q.yes_cents}|{q.no_cents}')
           PY
+
+      - name: typescript cents
+        run: |
           node --input-type=module -e '
             import { readFileSync } from "node:fs";
             const { quote } = await import("./dist/verify/odds.js");
-            const v = JSON.parse(readFileSync("verify/vectors.json", "utf8")).vectors;
-            for (const x of v) {
+            for (const x of JSON.parse(readFileSync("verify/vectors.json", "utf8")).vectors) {
               const q = quote(x.cap, x.level, x.sigma, x.hours, x.kind);
-              console.log(x.name, q.yesCents, q.noCents);
+              console.log(`${x.name}|${q.yesCents}|${q.noCents}`);
             }
           ' > /tmp/ts.txt
-          diff /tmp/py.txt /tmp/ts.txt && echo "engines agree on every vector"
+
+      - name: native cents
+        run: |
+          python - > /tmp/cpp.txt <<'PY'
+          import json, subprocess
+          for x in json.load(open("verify/vectors.json"))["vectors"]:
+              flag = "--floor" if x["kind"] == "floor" else "--target"
+              out = subprocess.run(["./native/bin/odds", "--cap", repr(x["cap"]), flag, repr(x["level"]),
+                                    "--sigma", repr(x["sigma"]), "--hours", repr(x["hours"])],
+                                   capture_output=True, text=True).stdout
+              yes = out.split("YES")[1].split("c")[0].strip()
+              no = out.split("NO")[1].split("c")[0].strip()
+              print(f'{x["name"]}|{yes}|{no}')
+          PY
+
+      - name: diff
+        run: |
+          diff /tmp/py.txt /tmp/ts.txt && echo "python and typescript agree"
+          diff /tmp/py.txt /tmp/cpp.txt && echo "python and c++ agree"
+          echo "three engines, identical cents on every vector"

@@ -33,9 +33,6 @@ jobs:
         run: python chain/fetch_logos.py 0.5
         continue-on-error: true
 
-      - name: rebuild the offline board
-        run: python board/build_board.py PREDLY
-
       - name: keep a dated copy
         run: |
           mkdir -p data/history
@@ -48,7 +45,7 @@ jobs:
         run: |
           git config user.name "predly-bot"
           git config user.email "bot@predly.tech"
-          git add data board/board.html
+          git add data
           if git diff --cached --quiet; then
             echo "chain quiet, nothing to commit"
           else
