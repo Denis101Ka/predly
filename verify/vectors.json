@@ -1,0 +1,138 @@
+{
+  "about": "Test vectors for the Predly odds engine. Both verify/odds.py and verify/odds.ts must reproduce every yes_cents value here, otherwise CI fails.",
+  "formula": {
+    "touch": "d = ln(level/cap) / (sigma*sqrt(tau));  p = clamp(2*(1-Phi(d)), 0.03, 0.97)",
+    "floor": "d = ln(cap/level) / (sigma*sqrt(tau));  p = clamp(2*Phi(d)-1, 0.03, 0.97)",
+    "cents": "yes = clamp(round(p*100), 1, 99);  no = 100 - yes",
+    "sigma": "sample std of 5m close-to-close log returns over the last 6h, times sqrt(12), clamped to [0.05, 3]",
+    "tau": "hours to the deadline, floored at one minute"
+  },
+  "sigma_series": {
+    "closes": [
+      1.0,
+      1.02,
+      0.99,
+      1.01,
+      1.04,
+      1.03,
+      1.05,
+      1.02,
+      1.06,
+      1.08,
+      1.05,
+      1.07,
+      1.09
+    ],
+    "expected_sigma": 0.084507
+  },
+  "vectors": [
+    {
+      "name": "README worked example, $PONS day market",
+      "cap": 493000000.0,
+      "level": 986000000.0,
+      "sigma": 0.35,
+      "hours": 5.5,
+      "kind": "touch",
+      "d": 0.844454,
+      "p_yes": 0.398416,
+      "yes_cents": 40,
+      "no_cents": 60
+    },
+    {
+      "name": "hour reach, mid cap meme",
+      "cap": 188000000.0,
+      "level": 205000000.0,
+      "sigma": 0.42,
+      "hours": 0.57,
+      "kind": "touch",
+      "d": 0.273005,
+      "p_yes": 0.784849,
+      "yes_cents": 78,
+      "no_cents": 22
+    },
+    {
+      "name": "hour hold, same token",
+      "cap": 188000000.0,
+      "level": 184000000.0,
+      "sigma": 0.42,
+      "hours": 0.57,
+      "kind": "floor",
+      "d": 0.067823,
+      "p_yes": 0.054074,
+      "yes_cents": 5,
+      "no_cents": 95
+    },
+    {
+      "name": "day double, fresh launch",
+      "cap": 42000.0,
+      "level": 84000.0,
+      "sigma": 1.8,
+      "hours": 14.0,
+      "kind": "touch",
+      "d": 0.102917,
+      "p_yes": 0.918028,
+      "yes_cents": 92,
+      "no_cents": 8
+    },
+    {
+      "name": "target already passed",
+      "cap": 996000.0,
+      "level": 750000.0,
+      "sigma": 0.6,
+      "hours": 0.3,
+      "kind": "touch",
+      "d": -0.863193,
+      "p_yes": 0.97,
+      "yes_cents": 97,
+      "no_cents": 3
+    },
+    {
+      "name": "floor far below, quiet token",
+      "cap": 1440000.0,
+      "level": 1200000.0,
+      "sigma": 0.18,
+      "hours": 3.0,
+      "kind": "floor",
+      "d": 0.584797,
+      "p_yes": 0.441316,
+      "yes_cents": 44,
+      "no_cents": 56
+    },
+    {
+      "name": "minute left, target far",
+      "cap": 355000.0,
+      "level": 420000.0,
+      "sigma": 0.75,
+      "hours": 0.017,
+      "kind": "touch",
+      "d": 1.719402,
+      "p_yes": 0.085541,
+      "yes_cents": 9,
+      "no_cents": 91
+    },
+    {
+      "name": "clamp ceiling, floor barely below",
+      "cap": 500000.0,
+      "level": 499000.0,
+      "sigma": 0.05,
+      "hours": 24.0,
+      "kind": "floor",
+      "d": 0.008173,
+      "p_yes": 0.03,
+      "yes_cents": 3,
+      "no_cents": 97
+    },
+    {
+      "name": "clamp floor, target unreachable",
+      "cap": 25000.0,
+      "level": 500000.0,
+      "sigma": 0.2,
+      "hours": 0.25,
+      "kind": "touch",
+      "d": 29.957323,
+      "p_yes": 0.03,
+      "yes_cents": 3,
+      "no_cents": 97
+    }
+  ]
+}

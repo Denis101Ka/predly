@@ -1,0 +1,69 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python:
+    name: python engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: unit tests
+        run: python -m unittest discover -s verify -p "test_*.py" -t . -v
+      - name: replay published vectors
+        run: python -m verify --vectors
+
+  typescript:
+    name: typescript engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - name: build and test
+        run: npm test
+
+  agreement:
+    name: both engines agree
+    needs: [python, typescript]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: compare cents across languages
+        run: |
+          python - <<'PY' > /tmp/py.txt
+          import json, sys
+          sys.path.insert(0, ".")
+          from verify.odds import quote
+          v = json.load(open("verify/vectors.json"))["vectors"]
+          for x in v:
+              q = quote(x["cap"], x["level"], x["sigma"], x["hours"], x["kind"])
+              print(x["name"], q.yes_cents, q.no_cents)
+          PY
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            const { quote } = await import("./dist/verify/odds.js");
+            const v = JSON.parse(readFileSync("verify/vectors.json", "utf8")).vectors;
+            for (const x of v) {
+              const q = quote(x.cap, x.level, x.sigma, x.hours, x.kind);
+              console.log(x.name, q.yesCents, q.noCents);
+            }
+          ' > /tmp/ts.txt
+          diff /tmp/py.txt /tmp/ts.txt && echo "engines agree on every vector"

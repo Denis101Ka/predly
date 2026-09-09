@@ -1,0 +1,58 @@
+name: chain snapshot
+
+# Reads Robinhood Chain on a schedule and commits the result, so the repository carries a
+# public history of caps and volumes that anyone can diff against their own scan.
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      blocks:
+        description: how many blocks back to scan
+        default: "60000"
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: install pillow for logo thumbnails
+        run: pip install --quiet pillow
+
+      - name: scan the chain
+        run: python chain/fetch_chain.py ${{ github.event.inputs.blocks || 60000 }}
+
+      - name: resolve launch metadata and images
+        run: python chain/fetch_logos.py 0.5
+        continue-on-error: true
+
+      - name: rebuild the offline board
+        run: python board/build_board.py PREDLY
+
+      - name: keep a dated copy
+        run: |
+          mkdir -p data/history
+          cp data/snapshot-latest.json "data/history/$(date -u +%Y-%m-%dT%H)Z.json"
+          ls -1 data/history | sort | head -n -168 | while read -r old; do
+            rm -f "data/history/$old"
+          done
+
+      - name: commit if anything moved
+        run: |
+          git config user.name "predly-bot"
+          git config user.email "bot@predly.tech"
+          git add data board/board.html
+          if git diff --cached --quiet; then
+            echo "chain quiet, nothing to commit"
+          else
+            head=$(python -c "import json;print(json.load(open('data/snapshot-latest.json'))['chain']['head_block'])")
+            git commit -m "data: snapshot at block $head"
+            git push
+          fi

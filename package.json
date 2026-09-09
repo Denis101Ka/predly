@@ -1,0 +1,17 @@
+{
+  "name": "predly-tools",
+  "version": "0.1.0",
+  "description": "Recompute Predly market odds, read Robinhood Chain yourself, run the open board.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test verify/odds.test.mjs",
+    "odds": "npm run build && node dist/cli.js"
+  },
+  "keywords": ["prediction-market", "robinhood-chain", "memecoin", "odds", "verification"],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/node": "^22.7.5"
+  }
+}
