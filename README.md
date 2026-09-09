@@ -31,7 +31,6 @@
 - [The published data](#the-published-data)
 - [Repository layout](#repository-layout)
 - [Reproduce everything](#reproduce-everything)
-- [What this repository is not](#what-this-repository-is-not)
 - [Questions people actually ask](#questions-people-actually-ask)
 
 ---
@@ -385,20 +384,6 @@ make -C native check         # the native engine and the Monte Carlo validation
 
 Test counts today: **12** Python tests, **10** Node tests, **3** native suites, all replaying the
 same vectors, plus the cross-language cent diff in CI.
-
-## What this repository is not
-
-It is not the Predly application. The site's server and front end are closed; what lives here is
-everything a visitor needs to audit the numbers, plus the tools that produced them.
-
-Trading on the site is **paper only** at this stage. Positions live in the visitor's browser, no
-order is ever sent, and the wallet connection is read-only — the site never requests a signature
-and never builds a transaction. See [SECURITY.md](SECURITY.md) for how to verify that yourself
-from the network tab rather than taking our word for it.
-
-Odds are **model-derived**, not bet-derived. On a book with real depth the price is the crowd's
-opinion; here it is a volatility model's opinion, which is a different thing and is labelled as
-such everywhere it appears.
 
 ## Questions people actually ask
 
