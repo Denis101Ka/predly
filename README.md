@@ -101,6 +101,10 @@ python -m verify --vectors
 9/9 vectors reproduced
 ```
 
+<p align="center">
+  <img src="assets/verify-terminal.png" alt="python -m verify replaying every published vector" width="100%">
+</p>
+
 No install, no dependencies, standard library only.
 
 ## Three engines, one price
@@ -152,6 +156,16 @@ p_yes = 2 · (1 − Φ(0.8445))
       = 2 · (1 − 0.8008)
       = 0.3984                                →  40c YES  /  60c NO
 ```
+
+<p align="center">
+  <img src="assets/odds-curves.png" alt="how the YES price moves with distance to target and with time left" width="100%">
+</p>
+
+Both panels are drawn straight out of `verify/odds.py`: the left one walks a cap toward a fixed
+target at three volatilities, the right one runs the clock down on three different targets. The
+shape is the whole product. A market with hours left and a target within reach hovers near the
+middle, where it is worth trading; the same market with four minutes left has already made up its
+mind.
 
 The clamp at `[0.03, 0.97]` is not decoration. A market never quotes certainty, because the model
 is never certain; the clamp is where the model admits it has stopped knowing.
@@ -214,6 +228,10 @@ flowchart LR
   G --> J["the same cents<br/>the site quotes"]
 ```
 
+<p align="center">
+  <img src="assets/tokens.png" alt="the tokens in the current snapshot with their real launch images" width="100%">
+</p>
+
 | What | How it is derived | Where |
 |---|---|---|
 | Token list, caps, volumes, fill counts | curve `BUY` / `SELL` logs, price = quote ÷ tokens, cap = price × 1e9 supply | [`chain/fetch_chain.py`](chain/fetch_chain.py) |
@@ -251,13 +269,14 @@ price.
 ./native/bin/montecarlo 200000 --steps 2000
 ```
 
-```
-  cell                                model      sim      gap
-  reach 1.5x, 1h, sigma 0.6          0.5030   0.5017   0.0013
-  the README example                 0.3984   0.3971   0.0013
-  hold 0.85x, 1h, sigma 0.5          0.7449   0.7462   0.0013
-  worst gap 0.0021, inside the 0.0120 tolerance: the formula holds
-```
+<p align="center">
+  <img src="assets/montecarlo.png" alt="closed form against simulated first passage frequencies" width="100%">
+</p>
+
+It failed the first time it ran, which is exactly what it was built for: the simulation carried
+an Itô correction that the pricing formula does not assume, and the two processes disagreed by
+ten points of probability. The fix is in the history, the modelling choice is now named in
+[docs/METHODOLOGY.md](docs/METHODOLOGY.md), and the check runs on every push.
 
 **`backtest`** sweeps the market templates across every price path in a snapshot: open a market
 at each point in the series, price it with the same engine, walk forward, record whether it would
@@ -267,6 +286,16 @@ table, and it is the only honest answer to *"when Predly says 30c, how often doe
 ```bash
 ./native/bin/backtest data/snapshot-latest.json --csv calibration.csv
 ```
+
+<p align="center">
+  <img src="assets/calibration.png" alt="quoted price against realised hit rate" width="100%">
+</p>
+
+The answer today is unflattering and published anyway: the model is **overconfident on near
+certainties** and **underprices the tails**. Markets it quoted around 95c happened about 79% of
+the time; markets it quoted under 10c happened about 10% of the time when it expected 5%. That is
+what a log-normal does to an asset whose caps are anything but log-normal, and it is the kind of
+number a project only shows when the number is real.
 
 **`odds`** is the native mirror of the Python CLI, plus a throughput mode, because the difference
 between three engines matters when you are pricing a few million markets:
@@ -341,7 +370,7 @@ native/     the C++ engine: vectors test, Monte Carlo validation, calibration ba
 chain/      the RPC readers that produce the snapshots
 board/      the offline board generator
 data/       snapshot-latest.json, dated history, cached launch images
-brand/      the banner generator, rendered from HTML so the type stays crisp
+brand/      banner and figure generators, rendered from HTML so the type stays crisp
 docs/       methodology, market rulebook, chain notes
 scripts/    verify.sh and snapshot.sh, the two commands that do everything above
 ```
