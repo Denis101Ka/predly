@@ -1,5 +1,5 @@
 {
-  "name": "predly-tools",
+  "name": "predly",
   "version": "0.1.0",
   "description": "Recompute Predly market odds, read Robinhood Chain yourself, run the open board.",
   "type": "module",

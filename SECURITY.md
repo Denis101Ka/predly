@@ -18,7 +18,7 @@ is not ours — close it and report it.
 
 ## Reporting a vulnerability
 
-Open a [security advisory](https://github.com/Denis101Ka/predly-tools/security/advisories/new),
+Open a [security advisory](https://github.com/Denis101Ka/predly/security/advisories/new),
 or write to security@predly.tech if the issue affects the live site.
 
 Please include what you did, what happened, and what you expected. If the report concerns the

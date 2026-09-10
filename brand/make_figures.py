@@ -157,7 +157,7 @@ def fig_verify_terminal():
         f'<span class="dot" style="background:{RED}"></span>',
         f'<span class="dot" style="background:{YELLOW}"></span>',
         f'<span class="dot" style="background:{ACID}"></span>',
-        '<span class="path">~/predly-tools</span></div><pre>',
+        '<span class="path">~/predly</span></div><pre>',
         f'<span class="p">$</span> <span class="c">python -m verify --cap 493e6 --target 986e6 '
         f'--sigma 0.35 --hours 5.5</span>\n{one}\n\n',
         f'<span class="p">$</span> <span class="c">python -m verify --vectors</span>\n',

@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Denis101Ka/predly-tools/actions/workflows/tests.yml"><img src="https://github.com/Denis101Ka/predly-tools/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
+  <a href="https://github.com/Denis101Ka/predly/actions/workflows/tests.yml"><img src="https://github.com/Denis101Ka/predly/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
   <img src="https://img.shields.io/badge/engines-python%20·%20typescript%20·%20c%2B%2B-C8FF00?style=flat-square&labelColor=050604" alt="three engines">
   <img src="https://img.shields.io/badge/chain-Robinhood%20Chain%20·%204663-C8FF00?style=flat-square&labelColor=050604" alt="Robinhood Chain 4663">
   <img src="https://img.shields.io/badge/data-read%20from%20the%20chain-C8FF00?style=flat-square&labelColor=050604" alt="data read from the chain">
@@ -75,7 +75,7 @@ None of it needs an account, an API key, or trust in us.
 ## Verify a price in 30 seconds
 
 ```bash
-git clone https://github.com/Denis101Ka/predly-tools && cd predly-tools
+git clone https://github.com/Denis101Ka/predly && cd predly
 python -m verify --cap 493e6 --target 986e6 --sigma 0.35 --hours 5.5
 ```
 
