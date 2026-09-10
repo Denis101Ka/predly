@@ -37,13 +37,17 @@
 
 ## What Predly is
 
-**Predly** puts a prediction market on the market cap of every memecoin launched on
+**Predly** puts prediction markets on the market caps of memecoins trading on
 [Robinhood Chain](https://predly.tech) (chain id `4663`, blocks roughly 101 ms apart). The board
-ranks the busiest tokens and gives each of them templated YES/NO questions about its own cap:
+keeps the **top twenty tokens by cap** and gives each of them **three** templated YES/NO questions
+about its own cap, so sixty markets are live at any moment, rebuilt from every snapshot:
 
 > Will **$SLOTH** reach **$154K** within the hour
 > Will **$PONS** double from **$493M** before 21:35 UTC
 > Will **$DLORE** stay above **$39K** till 15:00 UTC
+
+A token that launches shows up in the launches rail immediately and gets markets once it makes
+the top twenty, which is the point where a cap has enough trade behind it to be worth pricing.
 
 Shares are quoted in whole cents. YES and NO always add up to a dollar, so a price of `62c` is a
 probability of 62% with no conversion in between. Nobody votes on the outcome and there is no

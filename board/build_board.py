@@ -243,7 +243,7 @@ HTML = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 
   <div class="pan">
     <div class="ph"><span class="dot"></span><span class="t">Live markets</span><span class="src chain">CAPS FROM CHAIN</span>
-      <span class="m" id="m_board">every token on the launchpad gets a market on its cap</span></div>
+      <span class="m" id="m_board">the busiest tokens by cap, three markets each, rebuilt every refresh</span></div>
     <div class="pb"><div id="board">
       <div id="boardhead">
         <span>token</span><span>market</span><span>cap / target</span><span>curve tape</span>
